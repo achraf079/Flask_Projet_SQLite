@@ -36,44 +36,7 @@ def init_database():
     cur.execute("INSERT INTO clients (nom, prenom, adresse) VALUES (?, ?, ?)",
                 ('LEFEVRE', 'Thomas', '333, Rue de la Paix, 75002 Paris'))
     
-    # Créer quelques emprunts
-    today = datetime.now().strftime('%Y-%m-%d')
-    retour_prevu = (datetime.now() + timedelta(days=14)).strftime('%Y-%m-%d')
-    retour_passe = (datetime.now() - timedelta(days=5)).strftime('%Y-%m-%d')
-    retard = (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
-    
-    # Emprunt en cours
-    cur.execute("""
-        INSERT INTO emprunt (id_exemplaire, id_client, date_emprunt, date_retour_prevue, statut) 
-        VALUES (?, ?, ?, ?, ?)
-    """, (1, 1, today, retour_prevu, 'en_cours'))
-    
-    # Emprunt déjà retourné
-    cur.execute("""
-        INSERT INTO emprunt (id_exemplaire, id_client, date_emprunt, date_retour_prevue, 
-                            date_retour_effective, statut) 
-        VALUES (?, ?, ?, ?, ?, ?)
-    """, (2, 2, retard, retour_passe, retour_passe, 'retourné'))
-    
-    # Emprunt en retard
-    cur.execute("""
-        INSERT INTO emprunt (id_exemplaire, id_client, date_emprunt, date_retour_prevue, statut) 
-        VALUES (?, ?, ?, ?, ?)
-    """, (3, 3, retard, retour_passe, 'en_retard'))
-    
-    # Marquer l'exemplaire 3 comme non disponible (car en retard)
-    cur.execute("UPDATE exemplaire SET disponible = 0 WHERE id_exemplaire = 3")
-    
-    # Marquer l'exemplaire 1 comme non disponible (car emprunté)
-    cur.execute("UPDATE exemplaire SET disponible = 0 WHERE id_exemplaire = 1")
-    
-    # Ajouter quelques réservations
-    date_expiration = (datetime.now() + timedelta(days=7)).strftime('%Y-%m-%d')
-    
-    cur.execute("""
-        INSERT INTO reservation (id_livre, id_client, date_reservation, date_expiration, statut) 
-        VALUES (?, ?, ?, ?, ?)
-    """, (4, 4, today, date_expiration, 'en_attente'))
+
     
     # Ajouter quelques avis
     cur.execute("""
