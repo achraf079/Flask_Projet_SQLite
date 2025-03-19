@@ -53,7 +53,7 @@ def Readfiche(post_id):
 def ReadBDD():
     conn = sqlite3.connect('bibliotheque.db')
     cursor = conn.cursor()
-    cursor.execute('SELECT * FROM clients;')
+    cursor.execute('SELECT * FROM livres;')
     data = cursor.fetchall()
     conn.close()
     return render_template('page_accueil.html', data=data)
