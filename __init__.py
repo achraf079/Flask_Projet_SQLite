@@ -41,13 +41,13 @@ def authentification():
 
 @app.route('/fiche_client/<int:post_id>')
 def Readfiche(post_id):
-    conn = sqlite3.connect('database.db')
+    conn = sqlite3.connect('bibliotheque.db')
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM clients WHERE id = ?', (post_id,))
     data = cursor.fetchall()
     conn.close()
     # Rendre le template HTML et transmettre les données
-    return render_template('read_data.html', data=data)
+    return render_template('page_accueil.html', data=data)
 
 @app.route('/consultation/')
 def ReadBDD():
@@ -69,7 +69,7 @@ def enregistrer_client():
 
     
     # Connexion à la base de données
-    conn = sqlite3.connect('database.db')
+    conn = sqlite3.connect('bibliotheque.db')
     cursor = conn.cursor()
 
     # Exécution de la requête SQL pour insérer un nouveau client
