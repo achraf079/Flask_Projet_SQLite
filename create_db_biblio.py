@@ -32,7 +32,7 @@ def init_database():
 def create_tables(cur):
     """Version corrigée avec ordre de création strict"""
     # 1. Table utilisateurs (sans dépendances)
-    cur.execute('''
+    cur.execute('''  
         CREATE TABLE utilisateurs (
             id_utilisateur INTEGER PRIMARY KEY AUTOINCREMENT,
             nom TEXT NOT NULL,
@@ -107,10 +107,49 @@ def create_tables(cur):
             FOREIGN KEY (id_livre) REFERENCES livres(id_livre)
         )
     ''')
-    
-    # ... (autres tables conservent leur ordre actuel)
 
-# Les autres fonctions (hash_password, add_default_admin, etc.) restent identiques
+# Function to add a default admin user
+def add_default_admin(cur):
+    """Ajoute un utilisateur administrateur par défaut à la base de données"""
+    # Exemple de mot de passe crypté (utilisez une méthode sécurisée pour les mots de passe réels)
+    password_hash = hashlib.sha256("adminpassword".encode()).hexdigest()
+    date_inscription = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    # Ajout de l'utilisateur administrateur par défaut
+    cur.execute('''INSERT INTO utilisateurs (nom, prenom, email, mot_de_passe, date_inscription, est_administrateur) 
+                   VALUES (?, ?, ?, ?, ?, ?)''', 
+                ("Admin", "User", "admin@example.com", password_hash, date_inscription, 1))
+    print("Utilisateur administrateur par défaut ajouté.")
+
+# Function to add default categories (example)
+def add_default_categories(cur):
+    """Ajoute des catégories par défaut à la base de données"""
+    categories = [
+        ('Science Fiction', 'Books related to science fiction'),
+        ('Fantasy', 'Books related to fantasy'),
+        ('Non-fiction', 'Books based on real events and information'),
+        ('Romance', 'Books about love and relationships')
+    ]
+    
+    for category in categories:
+        cur.execute('''INSERT INTO categories (nom_categorie, description) VALUES (?, ?)''', category)
+    print("Catégories par défaut ajoutées.")
+
+# Function to add example books (example)
+def add_example_books(cur):
+    """Ajoute des livres d'exemple à la base de données"""
+    books = [
+        ('Dune', '9780441013593', 1965, 'Frank Herbert', 'A science fiction novel', 'English', 412, 1),
+        ('The Hobbit', '9780261103344', 1937, 'J.R.R. Tolkien', 'A fantasy novel', 'English', 310, 2),
+        ('Sapiens', '9780062316110', 2011, 'Yuval Noah Harari', 'A non-fiction book on the history of humankind', 'English', 443, 3),
+        ('Pride and Prejudice', '9781503290563', 1813, 'Jane Austen', 'A romantic novel', 'English', 279, 4)
+    ]
+    
+    for book in books:
+        cur.execute('''INSERT INTO livres (titre, isbn, annee_publication, editeur, resume, langue, nombre_pages, id_categorie, date_ajout) 
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)''', 
+                    (book[0], book[1], book[2], book[3], book[4], book[5], book[6], book[7], datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+    print("Livres d'exemple ajoutés.")
 
 if __name__ == "__main__":
     init_database()
