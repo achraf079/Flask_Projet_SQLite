@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BiblioTech - Accueil</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <header>
+        <div class="logo">
+            <h1><i class="fas fa-book-open"></i> BiblioTech</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html" class="active"><i class="fas fa-home"></i> Accueil</a></li>
+                <li><a href="recherche.html"><i class="fas fa-search"></i> Recherche</a></li>
+                <li><a href="catalogue.html"><i class="fas fa-book"></i> Catalogue</a></li>
+                <li><a href="mon-compte.html"><i class="fas fa-user"></i> Mon Compte</a></li>
+                <li id="admin-link" style="display: none;"><a href="admin/dashboard.html"><i class="fas fa-cogs"></i>
+                        Administration</a></li>
+                <li id="login-link"><a href="login.html"><i class="fas fa-sign-in-alt"></i> Connexion</a></li>
+                <li id="logout-link" style="display: none;"><a href="#" id="logout-button"><i
+                            class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="hero-content">
+                <h2>Bienvenue à BiblioTech</h2>
+                <p>Votre bibliothèque numérique moderne</p>
+                <div class="hero-buttons">
+                    <a href="recherche.html" class="btn primary-btn">Rechercher un livre</a>
+                    <a href="catalogue.html" class="btn secondary-btn">Parcourir le catalogue</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="features">
+            <h2>Nos services</h2>
+            <div class="feature-cards">
+                <div class="card">
+                    <i class="fas fa-search fa-3x"></i>
+                    <h3>Recherche avancée</h3>
+                    <p>Trouvez rapidement les livres que vous cherchez par titre, auteur ou catégorie.</p>
+                </div>
+                <div class="card">
+                    <i class="fas fa-calendar-alt fa-3x"></i>
+                    <h3>Emprunts faciles</h3>
+                    <p>Empruntez des livres en quelques clics et gérez vos dates de retour.</p>
+                </div>
+                <div class="card">
+                    <i class="fas fa-bell fa-3x"></i>
+                    <h3>Notifications</h3>
+                    <p>Recevez des rappels pour les retours de livres et des suggestions personnalisées.</p>
+                </div>
+                <div class="card">
+                    <i class="fas fa-star fa-3x"></i>
+                    <h3>Avis et notations</h3>
+                    <p>Partagez votre opinion sur les livres et découvrez ce que d'autres lecteurs en pensent.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="recently-added">
+            <h2>Livres récemment ajoutés</h2>
+
+            {% if data %}
+
+                {% for book in data %}
+                <div id="recent-books" class="book-grid">
+                    <h3>{{ book[1] }}</h3> <!-- Titre du livre -->
+                    <p><strong>ISBN:</strong> {{ book[2] }}</p>
+                    <p><strong>Année de publication:</strong> {{ book[3] }}</p>
+                    <p><strong>Éditeur:</strong> {{ book[4] }}</p>
+                    <p><strong>Résumé:</strong> {{ book[5] }}</p>
+                    <p><strong>Langue:</strong> {{ book[6] }}</p>
+                    <p><strong>Pages:</strong> {{ book[7] }}</p>
+                </div>
+                {% endfor %}
+                
+            {% else %}
+            <p>Aucun livre trouvé dans la base de données.</p>
+            {% endif %}
+
+            </div>
+            <div class="center-btn">
+                <a href="catalogue.html" class="btn primary-btn">Voir tout le catalogue</a>
+            </div>
+        </section>
+    </main>
+</body>
+
+</html>
