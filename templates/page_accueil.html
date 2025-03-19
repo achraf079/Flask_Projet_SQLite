@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bibliothèque</title>
+    <title>Liste des Livres</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -40,32 +40,27 @@
             margin: 10px 0;
             color: #666;
         }
-
-        .book-card .details {
-            font-size: 0.9em;
-            color: #444;
-        }
-
-        .book-card .details span {
-            font-weight: bold;
-        }
     </style>
 </head>
 <body>
     <h1>Liste des Livres</h1>
     
-    <div class="book-list">
-        {% for book in books %}
-        <div class="book-card">
-            <h3>{{ book[0] }}</h3>
-            <p><strong>ISBN:</strong> {{ book[1] }}</p>
-            <p><strong>Année de publication:</strong> {{ book[2] }}</p>
-            <p><strong>Éditeur:</strong> {{ book[3] }}</p>
-            <p><strong>Résumé:</strong> {{ book[4] }}</p>
-            <p><strong>Langue:</strong> {{ book[5] }}</p>
-            <p><strong>Pages:</strong> {{ book[6] }}</p>
+    {% if data %}
+        <div class="book-list">
+            {% for book in data %}
+            <div class="book-card">
+                <h3>{{ book[1] }}</h3> <!-- Titre du livre -->
+                <p><strong>ISBN:</strong> {{ book[2] }}</p>
+                <p><strong>Année de publication:</strong> {{ book[3] }}</p>
+                <p><strong>Éditeur:</strong> {{ book[4] }}</p>
+                <p><strong>Résumé:</strong> {{ book[5] }}</p>
+                <p><strong>Langue:</strong> {{ book[6] }}</p>
+                <p><strong>Pages:</strong> {{ book[7] }}</p>
+            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
-    </div>
+    {% else %}
+        <p>Aucun livre trouvé dans la base de données.</p>
+    {% endif %}
 </body>
 </html>
