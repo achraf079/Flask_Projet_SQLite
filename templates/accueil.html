@@ -6,7 +6,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BiblioTech - Accueil</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css">
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .book-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .book-card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .book-card h3 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        .book-card p {
+            margin: 10px 0;
+            color: #666;
+        }
+    </style>
 </head>
 
 <body>
@@ -83,7 +120,7 @@
                     <p><strong>Pages:</strong> {{ book[7] }}</p>
                 </div>
                 {% endfor %}
-                
+
             {% else %}
             <p>Aucun livre trouvé dans la base de données.</p>
             {% endif %}
