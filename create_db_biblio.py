@@ -19,8 +19,31 @@ def init_database():
     
     # 2. Insertion des données APRÈS la création des tables
     add_default_admin(cur)
-    add_default_categories(cur)
-    add_example_books(cur)
+    def add_default_admin(cur):
+        """Ajoute un administrateur par défaut à la table utilisateurs."""
+        default_password = hashlib.sha256("admin123".encode()).hexdigest()
+        cur.execute('''
+            INSERT INTO utilisateurs (nom, prenom, email, mot_de_passe, date_inscription, est_administrateur)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', ("Admin", "Default", "admin@example.com", default_password, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), 1))
+        print("Administrateur par défaut ajouté.")
+        add_default_categories(cur)
+    
+    def add_default_categories(cur):
+        """Ajoute des catégories par défaut à la table catégories."""
+        categories = [
+            ("Fiction", "Livres de fiction, y compris romans et nouvelles."),
+            ("Non-fiction", "Livres basés sur des faits réels."),
+            ("Science", "Livres scientifiques et éducatifs."),
+            ("Histoire", "Livres historiques."),
+            ("Biographie", "Livres biographiques.")
+        ]
+        cur.executemany('''
+            INSERT INTO categories (nom_categorie, description)
+            VALUES (?, ?)
+        ''', categories)
+        print("Catégories par défaut ajoutées.")
+    # add_example_books(cur)  # Commented out as the function is not defined
     
     conn.commit()
     conn.close()
