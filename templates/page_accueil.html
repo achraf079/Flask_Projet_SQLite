@@ -946,7 +946,6 @@ table th {
                 </div>
             </div>
         </section>
-        <!--
         <section class="features">
             <h2>Nos services</h2>
             <div class="feature-cards">
@@ -972,28 +971,107 @@ table th {
                 </div>
             </div>
         </section>
-        -->
 
-        <table>
-            <tr>
-                <th>ID</th>
-                <th>Création</th>
-                <th>Nom</th>
-                <th>Prénom</th>
-                <th>Adresse</th>
-            </tr>
-            {% for row in data %}
-            <tr>
-                <td>{{ row[0] }}</td>
-                <td>{{ row[1] }}</td>
-                <td>{{ row[2] }}</td>
-                <td>{{ row[3] }}</td>
-                <td>{{ row[4] }}</td>
-            </tr>
-            {% endfor %}
-        </table>
+        <section class="recently-added">
+            <h2>Livres récemment ajoutés</h2>
+            <div id="recent-books" class="book-grid">
+                <!-- Les livres seront chargés dynamiquement ici -->
+                <div class="book-loading">Chargement des livres récents...</div>
+            </div>
+            <div class="center-btn">
+                <a href="catalogue.html" class="btn primary-btn">Voir tout le catalogue</a>
+            </div>
+        </section>
     </main>
 
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>BiblioTech</h3>
+                <p>Votre bibliothèque moderne et connectée.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Liens rapides</h3>
+                <ul>
+                    <li><a href="index.html">Accueil</a></li>
+                    <li><a href="recherche.html">Recherche</a></li>
+                    <li><a href="catalogue.html">Catalogue</a></li>
+                    <li><a href="mon-compte.html">Mon Compte</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Contact</h3>
+                <p><i class="fas fa-map-marker-alt"></i> 123 Rue de la Bibliothèque, 75000 Paris</p>
+                <p><i class="fas fa-phone"></i> 01 23 45 67 89</p>
+                <p><i class="fas fa-envelope"></i> contact@bibliotech.fr</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 BiblioTech. Tous droits réservés.</p>
+        </div>
+    </footer>
 
+    <script src="js/auth.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        // Chargement des livres récents
+        document.addEventListener('DOMContentLoaded', function() {
+            loadRecentBooks();
+            updateNavigation();
+        });
+
+        function loadRecentBooks() {
+            fetch('api/livres/recents')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erreur de chargement des livres récents');
+                    }
+                    return response.json();
+                })
+                .then(books => {
+                    const recentBooksContainer = document.getElementById('recent-books');
+                    recentBooksContainer.innerHTML = '';
+                    
+                    if (books.length === 0) {
+                        recentBooksContainer.innerHTML = '<p>Aucun livre récent disponible.</p>';
+                        return;
+                    }
+                    
+                    books.forEach(book => {
+                        const bookElement = createBookElement(book);
+                        recentBooksContainer.appendChild(bookElement);
+                    });
+                })
+                .catch(error => {
+                    const recentBooksContainer = document.getElementById('recent-books');
+                    recentBooksContainer.innerHTML = `<p class="error">Erreur: ${error.message}</p>`;
+                    console.error('Erreur lors du chargement des livres récents:', error);
+                });
+        }
+
+        function createBookElement(book) {
+            const bookDiv = document.createElement('div');
+            bookDiv.className = 'book-card';
+            
+            const disponibilite = book.disponible ? 
+                '<span class="badge available">Disponible</span>' : 
+                '<span class="badge unavailable">Indisponible</span>';
+                
+            bookDiv.innerHTML = `
+                <div class="book-cover">
+                    <img src="${book.coverUrl || 'images/cover-placeholder.jpg'}" alt="Couverture de ${book.titre}">
+                </div>
+                <div class="book-info">
+                    <h3>${book.titre}</h3>
+                    <p class="author">par ${book.auteur}</p>
+                    <p class="category">${book.categorie}</p>
+                    ${disponibilite}
+                    <a href="livre-details.html?id=${book.id}" class="btn small-btn">Détails</a>
+                </div>
+            `;
+            
+            return bookDiv;
+        }
+    </script>
 </body>
 </html>
