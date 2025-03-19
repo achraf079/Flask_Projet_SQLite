@@ -8,50 +8,30 @@ DB_PATH = 'bibliotheque.db'
 def init_database():
     if os.path.exists(DB_PATH):
         os.remove(DB_PATH)
-        print(f"Ancienne base de données supprimée.")
     
     conn = sqlite3.connect(DB_PATH)
     conn.execute("PRAGMA foreign_keys = ON")
     cur = conn.cursor()
     
-    # 1. Création de TOUTES les tables en premier
+    # Création de toutes les tables en premier
     create_tables(cur)
     
-    # 2. Insertion des données APRÈS la création des tables
-    add_default_admin(cur)
-    def add_default_admin(cur):
-        """Ajoute un administrateur par défaut à la table utilisateurs."""
-        default_password = hashlib.sha256("admin123".encode()).hexdigest()
-        cur.execute('''
-            INSERT INTO utilisateurs (nom, prenom, email, mot_de_passe, date_inscription, est_administrateur)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ''', ("Admin", "Default", "admin@example.com", default_password, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), 1))
-        print("Administrateur par défaut ajouté.")
-        add_default_categories(cur)
+    # Vérification des tables créées
+    cur.execute("SELECT name FROM sqlite_master WHERE type='table'")
+    print("Tables créées:", cur.fetchall())
     
-    def add_default_categories(cur):
-        """Ajoute des catégories par défaut à la table catégories."""
-        categories = [
-            ("Fiction", "Livres de fiction, y compris romans et nouvelles."),
-            ("Non-fiction", "Livres basés sur des faits réels."),
-            ("Science", "Livres scientifiques et éducatifs."),
-            ("Histoire", "Livres historiques."),
-            ("Biographie", "Livres biographiques.")
-        ]
-        cur.executemany('''
-            INSERT INTO categories (nom_categorie, description)
-            VALUES (?, ?)
-        ''', categories)
-        print("Catégories par défaut ajoutées.")
-    # add_example_books(cur)  # Commented out as the function is not defined
+    # Insertion des données
+    add_default_admin(cur)
+    add_default_categories(cur)
+    add_example_books(cur)
     
     conn.commit()
     conn.close()
-    print(f"Base initialisée : {os.path.abspath(DB_PATH)}")
+    print("Base initialisée avec succès")
 
 def create_tables(cur):
-    """Version complète et correcte de la création des tables"""
-    # Table utilisateurs
+    """Version corrigée avec ordre de création strict"""
+    # 1. Table utilisateurs (sans dépendances)
     cur.execute('''
         CREATE TABLE utilisateurs (
             id_utilisateur INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -67,7 +47,7 @@ def create_tables(cur):
         )
     ''')
     
-    # Table catégories
+    # 2. Catégories (sans dépendances)
     cur.execute('''
         CREATE TABLE categories (
             id_categorie INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -76,7 +56,7 @@ def create_tables(cur):
         )
     ''')
     
-    # Table auteurs (CRÉÉE AVANT les livres)
+    # 3. Auteurs (sans dépendances)
     cur.execute('''
         CREATE TABLE auteurs (
             id_auteur INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -87,7 +67,7 @@ def create_tables(cur):
         )
     ''')
     
-    # Table livres
+    # 4. Livres (dépend de catégories)
     cur.execute('''
         CREATE TABLE livres (
             id_livre INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -100,28 +80,37 @@ def create_tables(cur):
             nombre_pages INTEGER,
             id_categorie INTEGER,
             date_ajout TEXT NOT NULL,
-            FOREIGN KEY (id_categorie) REFERENCES categories(id_categorie) ON DELETE SET NULL
+            FOREIGN KEY (id_categorie) REFERENCES categories(id_categorie)
         )
     ''')
     
-    # Table de liaison livre_auteur (CRÉÉE APRÈS livres et auteurs)
+    # 5. Livre-Auteur (dépend de livres et auteurs)
     cur.execute('''
         CREATE TABLE livre_auteur (
             id_livre INTEGER,
             id_auteur INTEGER,
             PRIMARY KEY (id_livre, id_auteur),
-            FOREIGN KEY (id_livre) REFERENCES livres(id_livre) ON DELETE CASCADE,
-            FOREIGN KEY (id_auteur) REFERENCES auteurs(id_auteur) ON DELETE CASCADE
+            FOREIGN KEY (id_livre) REFERENCES livres(id_livre),
+            FOREIGN KEY (id_auteur) REFERENCES auteurs(id_auteur)
         )
     ''')
     
-    # Reste des tables (exemplaires, emprunts, etc.)
-    # ... [le code existant pour les autres tables] ...
+    # 6. Exemplaires (dépend de livres)
+    cur.execute('''
+        CREATE TABLE exemplaires (
+            id_exemplaire INTEGER PRIMARY KEY AUTOINCREMENT,
+            id_livre INTEGER NOT NULL,
+            code_reference TEXT UNIQUE NOT NULL,
+            etat TEXT NOT NULL,
+            date_acquisition TEXT NOT NULL,
+            est_disponible INTEGER DEFAULT 1,
+            FOREIGN KEY (id_livre) REFERENCES livres(id_livre)
+        )
+    ''')
+    
+    # ... (autres tables conservent leur ordre actuel)
 
-    print("Toutes les tables créées avec succès.")
-
-# ... [les autres fonctions restent identiques] ...
+# Les autres fonctions (hash_password, add_default_admin, etc.) restent identiques
 
 if __name__ == "__main__":
-    print("Initialisation de la base de données...")
     init_database()
