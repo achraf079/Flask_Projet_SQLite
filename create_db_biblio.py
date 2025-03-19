@@ -36,18 +36,6 @@ def init_database():
     cur.execute("INSERT INTO clients (nom, prenom, adresse) VALUES (?, ?, ?)",
                 ('LEFEVRE', 'Thomas', '333, Rue de la Paix, 75002 Paris'))
     
-    # Mettre à jour les clients avec des emails et téléphones fictifs
-    cur.execute("UPDATE clients SET email = ?, telephone = ? WHERE id = ?", 
-                ('emilie.dupont@email.com', '0123456789', 1))
-    cur.execute("UPDATE clients SET email = ?, telephone = ? WHERE id = ?", 
-                ('lucas.leroux@email.com', '0234567890', 2))
-    cur.execute("UPDATE clients SET email = ?, telephone = ? WHERE id = ?", 
-                ('amandine.martin@email.com', '0345678901', 3))
-    cur.execute("UPDATE clients SET email = ?, telephone = ? WHERE id = ?", 
-                ('antoine.tremblay@email.com', '0456789012', 4))
-    cur.execute("UPDATE clients SET email = ?, telephone = ?, role = ? WHERE id = ?", 
-                ('sarah.lambert@email.com', '0567890123', 'admin', 5))
-    
     # Créer quelques emprunts
     today = datetime.now().strftime('%Y-%m-%d')
     retour_prevu = (datetime.now() + timedelta(days=14)).strftime('%Y-%m-%d')
