@@ -23,8 +23,13 @@ def est_authentifie():
 
 
 @app.route('/')
-def index():
-    return render_template('accueil.html')
+def ReadBDD():
+    conn = sqlite3.connect('bibliotheque.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM livres;')
+    data = cursor.fetchall()
+    conn.close()
+    return render_template('accueil.html', data=data)
 
 
 @app.route('/lecture')
@@ -62,16 +67,6 @@ def Readfiche(post_id):
     conn.close()
     # Rendre le template HTML et transmettre les données
     return render_template('page_accueil.html', data=data)
-
-
-@app.route('/consultation/')
-def ReadBDD():
-    conn = sqlite3.connect('bibliotheque.db')
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM livres;')
-    data = cursor.fetchall()
-    conn.close()
-    return render_template('accueil.html', data=data)
 
 
 @app.route('/categories/')
@@ -125,17 +120,18 @@ def ajout_emprunt():
     if request.method == 'POST':
         id_utilisateur = request.form['id_utilisateur']
         id_livre = request.form['id_livre']
-        
+
         conn = get_db_connection()
         cur = conn.cursor()
 
         # Trouver un exemplaire disponible
-        cur.execute("SELECT id_exemplaire FROM exemplaires WHERE id_livre = ? AND est_disponible = 1 LIMIT 1", (id_livre,))
+        cur.execute(
+            "SELECT id_exemplaire FROM exemplaires WHERE id_livre = ? AND est_disponible = 1 LIMIT 1", (id_livre,))
         exemplaire = cur.fetchone()
 
         if exemplaire:
             id_exemplaire = exemplaire['id_exemplaire']
-            
+
             # Ajouter l'emprunt
             cur.execute('''
                 INSERT INTO emprunts (id_utilisateur, id_exemplaire, date_emprunt, date_retour_prevue, est_retourne) 
@@ -143,7 +139,8 @@ def ajout_emprunt():
             ''', (id_utilisateur, id_exemplaire))
 
             # Mettre à jour la disponibilité de l'exemplaire
-            cur.execute("UPDATE exemplaires SET est_disponible = 0 WHERE id_exemplaire = ?", (id_exemplaire,))
+            cur.execute(
+                "UPDATE exemplaires SET est_disponible = 0 WHERE id_exemplaire = ?", (id_exemplaire,))
 
             conn.commit()
             flash('Emprunt ajouté avec succès !')
