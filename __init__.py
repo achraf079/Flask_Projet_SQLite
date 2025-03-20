@@ -153,6 +153,8 @@ def ajout_emprunt():
         conn.close()
         return redirect(url_for('liste_emprunts'))
 
+    return render_template('ajout_emprunt.html')
+
 
 # Route pour ajouter un nouveau lecteur
 @app.route('/lecteur/ajouter', methods=['GET', 'POST'])
