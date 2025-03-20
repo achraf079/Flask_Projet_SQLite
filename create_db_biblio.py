@@ -24,7 +24,7 @@ def init_database():
     # Insertion des données
     add_default_admin(cur)
     add_default_categories(cur)
-    add_example_books(cur)
+    ajouter_livres_ex(cur)
 
     conn.commit()
     conn.close()
