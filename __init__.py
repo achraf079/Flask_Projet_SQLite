@@ -76,13 +76,11 @@ def ReadBDD():
 def afficher_categories():
     conn = get_db_connection()
     cur = conn.cursor()
-
     cur.execute("SELECT id_categorie, nom_categorie FROM categories")
     categories = cur.fetchall()
     conn.close()
 
     return render_template('categories.html', categories=categories)
-
 
 @app.route('/ajout_livre', methods=['GET', 'POST'])
 def ajouter_livre():
