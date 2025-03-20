@@ -5,6 +5,9 @@ from urllib.request import urlopen
 from werkzeug.utils import secure_filename
 import sqlite3
 
+def get_db_connection():
+    return sqlite3.connect('bibliotheque.db')
+
 app = Flask(__name__)                                                                                                                  
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'  # Clé secrète pour les sessions
 
@@ -77,7 +80,7 @@ def ajouter_lecteur():
         flash('Le lecteur a été ajouté avec succès!')
         return redirect(url_for('ajouter_emprunt'))
     
-    return render_template('ajout_lecteur.html')
+    return render_template('ajout_livre.html')
 
 
 @app.route('/init_db')
