@@ -153,7 +153,7 @@ def ajout_emprunt():
         conn.close()
         return redirect(url_for('liste_emprunts'))
 
-    return render_template('ajout_emprunt.html')
+    return render_template('accueil.html')
 
 
 # Route pour ajouter un nouveau lecteur
