@@ -5,6 +5,7 @@ from urllib.request import urlopen
 from werkzeug.utils import secure_filename
 import sqlite3
 import datetime
+from datetime import timedelta
 
 
 def get_db_connection():
@@ -117,6 +118,86 @@ def ajout_livre():
         return redirect(url_for('ajout_livre'))  # Redirection après ajout
 
     return render_template('ajout_livre.html', categories=categories)
+
+
+@app.route('/emprunt/ajouter', methods=['GET', 'POST'])
+def ajouter_emprunt():
+    if request.method == 'POST':
+        livre_id = request.form['livre_id']
+        lecteur_id = request.form['lecteur_id']
+        date_emprunt = request.form['date_emprunt']
+        date_retour_prevue = request.form['date_retour_prevue']
+
+        # Vérifier la disponibilité du livre
+        conn = get_db_connection()
+        livre = conn.execute(
+            'SELECT * FROM livres WHERE id = ?', (livre_id,)).fetchone()
+
+        emprunts_actifs = conn.execute('''
+            SELECT COUNT(*) as count FROM emprunts 
+            WHERE livre_id = ? AND date_retour IS NULL
+        ''', (livre_id,)).fetchone()['count']
+
+        if emprunts_actifs >= livre['stock']:
+            flash('Ce livre n\'est pas disponible pour emprunt.')
+            conn.close()
+            return redirect(url_for('ajout_emprunt'))
+
+        # Ajouter l'emprunt
+        conn.execute('''
+            INSERT INTO emprunts (livre_id, lecteur_id, date_emprunt, date_retour_prevue)
+            VALUES (?, ?, ?, ?)
+        ''', (livre_id, lecteur_id, date_emprunt, date_retour_prevue))
+        conn.commit()
+        conn.close()
+
+        flash('L\'emprunt a été enregistré avec succès!')
+        return redirect(url_for('liste_emprunts'))
+
+    # Pour le formulaire GET, récupérer la liste des livres et des lecteurs
+    conn = get_db_connection()
+    livres = conn.execute('''
+        SELECT livres.*, 
+               (livres.stock - (SELECT COUNT(*) FROM emprunts 
+                               WHERE emprunts.livre_id = livres.id AND emprunts.date_retour IS NULL)) as disponibles
+        FROM livres
+        WHERE (livres.stock - (SELECT COUNT(*) FROM emprunts 
+                              WHERE emprunts.livre_id = livres.id AND emprunts.date_retour IS NULL)) > 0
+    ''').fetchall()
+
+    lecteurs = conn.execute(
+        'SELECT * FROM lecteurs ORDER BY nom, prenom').fetchall()
+    conn.close()
+
+    # Calculer la date du jour et la date de retour par défaut (aujourd'hui + 14 jours)
+    today = datetime.now().strftime('%Y-%m-%d')
+    return_date = (datetime.now() + timedelta(days=14)).strftime('%Y-%m-%d')
+
+    return render_template('ajout_emprunt.html', livres=livres, lecteurs=lecteurs,
+                           today=today, return_date=return_date)
+
+
+# Route pour ajouter un nouveau lecteur
+@app.route('/lecteur/ajouter', methods=['GET', 'POST'])
+def ajout_lecteur():
+    if request.method == 'POST':
+        nom = request.form['nom']
+        prenom = request.form['prenom']
+        email = request.form['email']
+        telephone = request.form['telephone']
+
+        conn = get_db_connection()
+        conn.execute('''
+            INSERT INTO lecteurs (nom, prenom, email, telephone)
+            VALUES (?, ?, ?, ?)
+        ''', (nom, prenom, email, telephone))
+        conn.commit()
+        conn.close()
+
+        flash('Le lecteur a été ajouté avec succès!')
+        return redirect(url_for('ajouter_emprunt'))
+
+    return render_template('ajout_lecteur.html')
 
 
 @app.route('/init_db')

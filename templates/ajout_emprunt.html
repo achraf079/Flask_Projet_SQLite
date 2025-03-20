@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajouter un emprunt - Gestion de Bibliothèque</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Système de Gestion de Bibliothèque</h1>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('index') }}">Accueil</a></li>
+                <li><a href="{{ url_for('ajout_livre') }}">Ajouter un livre</a></li>
+                <li><a href="{{ url_for('ajout_emprunt') }}" class="active">Ajouter un emprunt</a></li>
+                <li><a href="{{ url_for('liste_livres') }}">Liste des livres</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <main>
+        
+        <section class="form-container">
+            <h2>Enregistrer un nouvel emprunt</h2>
+            <form id="ajout-emprunt-form" action="{{ url_for('ajout_emprunt') }}" method="POST">
+                <div class="form-group">
+                    <label for="livre_id">Livre:</label>
+                    <select id="livre_id" name="livre_id" required>
+                        <option value="">Sélectionnez un livre</option>
+                        {% for livre in livres %}
+                        <option value="{{ livre['id'] }}" {% if request.args.get('livre_id')|int == livre['id'] %}selected{% endif %}>
+                            {{ livre['titre'] }} ({{ livre['auteur'] }}) - Disponible: {{ livre['disponibles'] }}/{{ livre['stock'] }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="lecteur_id">Lecteur:</label>
+                    <select id="lecteur_id" name="lecteur_id" required>
+                        <option value="">Sélectionnez un lecteur</option>
+                        {% for lecteur in lecteurs %}
+                        <option value="{{ lecteur['id'] }}">{{ lecteur['nom'] }} {{ lecteur['prenom'] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nouveau-lecteur">Nouveau lecteur?</label>
+                    <a href="{{ url_for('ajout_lecteur') }}" class="btn-secondary">Ajouter un lecteur</a>
+                </div>
+                
+                <div class="form-group">
+                    <label for="date_emprunt">Date d'emprunt:</label>
+                    <input type="date" id="date_emprunt" name="date_emprunt" value="{{ today }}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="date_retour_prevue">Date de retour prévue:</label>
+                    <input type="date" id="date_retour_prevue" name="date_retour_prevue" value="{{ return_date }}" required>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Enregistrer l'emprunt</button>
+                    <button type="reset" class="btn-secondary">Réinitialiser</button>
+                </div>
+            </form>
+        </section>
+    </main>
+    
+    <footer>
+        <p>&copy; 2025 - Système de Gestion de Bibliothèque</p>
+    </footer>
+</body>
+</html>
