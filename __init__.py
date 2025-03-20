@@ -23,7 +23,7 @@ def est_authentifie():
 
 
 @app.route('/')
-def ReadBDD():
+def index():
     conn = sqlite3.connect('bibliotheque.db')
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM livres;')
