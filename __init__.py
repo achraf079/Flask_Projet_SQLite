@@ -120,61 +120,38 @@ def ajout_livre():
     return render_template('ajout_livre.html', categories=categories)
 
 
-@app.route('/emprunt/ajouter', methods=['GET', 'POST'])
-def ajouter_emprunt():
+@app.route('/ajouter_emprunt', methods=['POST'])
+def ajout_emprunt():
     if request.method == 'POST':
-        livre_id = request.form['livre_id']
-        lecteur_id = request.form['lecteur_id']
-        date_emprunt = request.form['date_emprunt']
-        date_retour_prevue = request.form['date_retour_prevue']
-
-        # Vérifier la disponibilité du livre
+        id_utilisateur = request.form['id_utilisateur']
+        id_livre = request.form['id_livre']
+        
         conn = get_db_connection()
-        livre = conn.execute(
-            'SELECT * FROM livres WHERE id = ?', (livre_id,)).fetchone()
+        cur = conn.cursor()
 
-        emprunts_actifs = conn.execute('''
-            SELECT COUNT(*) as count FROM emprunts 
-            WHERE livre_id = ? AND date_retour IS NULL
-        ''', (livre_id,)).fetchone()['count']
+        # Trouver un exemplaire disponible
+        cur.execute("SELECT id_exemplaire FROM exemplaires WHERE id_livre = ? AND est_disponible = 1 LIMIT 1", (id_livre,))
+        exemplaire = cur.fetchone()
 
-        if emprunts_actifs >= livre['stock']:
-            flash('Ce livre n\'est pas disponible pour emprunt.')
-            conn.close()
-            return redirect(url_for('ajout_emprunt'))
+        if exemplaire:
+            id_exemplaire = exemplaire['id_exemplaire']
+            
+            # Ajouter l'emprunt
+            cur.execute('''
+                INSERT INTO emprunts (id_utilisateur, id_exemplaire, date_emprunt, date_retour_prevue, est_retourne) 
+                VALUES (?, ?, DATE('now'), DATE('now', '+14 days'), 0)
+            ''', (id_utilisateur, id_exemplaire))
 
-        # Ajouter l'emprunt
-        conn.execute('''
-            INSERT INTO emprunts (livre_id, lecteur_id, date_emprunt, date_retour_prevue)
-            VALUES (?, ?, ?, ?)
-        ''', (livre_id, lecteur_id, date_emprunt, date_retour_prevue))
-        conn.commit()
+            # Mettre à jour la disponibilité de l'exemplaire
+            cur.execute("UPDATE exemplaires SET est_disponible = 0 WHERE id_exemplaire = ?", (id_exemplaire,))
+
+            conn.commit()
+            flash('Emprunt ajouté avec succès !')
+        else:
+            flash('Aucun exemplaire disponible pour ce livre.')
+
         conn.close()
-
-        flash('L\'emprunt a été enregistré avec succès!')
         return redirect(url_for('liste_emprunts'))
-
-    # Pour le formulaire GET, récupérer la liste des livres et des lecteurs
-    conn = get_db_connection()
-    livres = conn.execute('''
-        SELECT livres.*, 
-               (livres.stock - (SELECT COUNT(*) FROM emprunts 
-                               WHERE emprunts.livre_id = livres.id AND emprunts.date_retour IS NULL)) as disponibles
-        FROM livres
-        WHERE (livres.stock - (SELECT COUNT(*) FROM emprunts 
-                              WHERE emprunts.livre_id = livres.id AND emprunts.date_retour IS NULL)) > 0
-    ''').fetchall()
-
-    lecteurs = conn.execute(
-        'SELECT * FROM lecteurs ORDER BY nom, prenom').fetchall()
-    conn.close()
-
-    # Calculer la date du jour et la date de retour par défaut (aujourd'hui + 14 jours)
-    today = datetime.now().strftime('%Y-%m-%d')
-    return_date = (datetime.now() + timedelta(days=14)).strftime('%Y-%m-%d')
-
-    return render_template('ajout_emprunt.html', livres=livres, lecteurs=lecteurs,
-                           today=today, return_date=return_date)
 
 
 # Route pour ajouter un nouveau lecteur
