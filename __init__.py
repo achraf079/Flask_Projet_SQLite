@@ -83,7 +83,7 @@ def afficher_categories():
     return render_template('categories.html', categories=categories)
 
 @app.route('/ajout_livre', methods=['GET', 'POST'])
-def ajouter_livre():
+def ajoute_livre():
     conn = get_db_connection()
     cur = conn.cursor()
 
