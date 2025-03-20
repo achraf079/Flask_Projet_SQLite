@@ -120,7 +120,7 @@ def ajout_livre():
     return render_template('ajout_livre.html', categories=categories)
 
 
-@app.route('/ajouter_emprunt', methods=['POST'])
+@app.route('/emprunt/ajouter', methods=['GET', 'POST'])
 def ajout_emprunt():
     if request.method == 'POST':
         id_utilisateur = request.form['id_utilisateur']
