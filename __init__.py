@@ -23,8 +23,8 @@ def est_authentifie():
 
 
 @app.route('/')
-def hello_world():
-    return render_template('hello.html')
+def index():
+    return render_template('accueil.html')
 
 
 @app.route('/lecture')
