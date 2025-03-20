@@ -63,7 +63,7 @@ def Readfiche(post_id):
     return render_template('page_accueil.html', data=data)
 
 
-@app.route('/consultation')
+@app.route('/consultation/')
 def ReadBDD():
     conn = sqlite3.connect('bibliotheque.db')
     cursor = conn.cursor()
@@ -73,7 +73,7 @@ def ReadBDD():
     return render_template('accueil.html', data=data)
 
 
-@app.route('/categories')
+@app.route('/categories/')
 def afficher_categories():
     conn = get_db_connection()
     cur = conn.cursor()
