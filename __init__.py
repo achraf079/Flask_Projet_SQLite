@@ -1,4 +1,4 @@
-from flask import Flask, render_template_string, render_template, jsonify, request, redirect, url_for, session
+from flask import Flask, render_template_string, render_template, jsonify, request, redirect, url_for, session, flash
 from flask import render_template
 from flask import json
 from urllib.request import urlopen
@@ -58,25 +58,75 @@ def ReadBDD():
     conn.close()
     return render_template('accueil.html', data=data)
 
-@app.route('/enregistrer_client', methods=['GET'])
-def formulaire_client():
-    return render_template('formulaire.html')  # afficher le formulaire
-
-@app.route('/enregistrer_client', methods=['POST'])
-def enregistrer_client():
-    nom = request.form['nom']
-    prenom = request.form['prenom']
-
+@app.route('/lecteur/ajouter', methods=['GET', 'POST'])
+def ajouter_lecteur():
+    if request.method == 'POST':
+        nom = request.form['nom']
+        prenom = request.form['prenom']
+        email = request.form['email']
+        telephone = request.form['telephone']
+        
+        conn = get_db_connection()
+        conn.execute('''
+            INSERT INTO lecteurs (nom, prenom, email, telephone)
+            VALUES (?, ?, ?, ?)
+        ''', (nom, prenom, email, telephone))
+        conn.commit()
+        conn.close()
+        
+        flash('Le lecteur a été ajouté avec succès!')
+        return redirect(url_for('ajouter_emprunt'))
     
-    # Connexion à la base de données
-    conn = sqlite3.connect('bibliotheque.db')
-    cursor = conn.cursor()
+    return render_template('ajout_lecteur.html')
 
-    # Exécution de la requête SQL pour insérer un nouveau client
-    cursor.execute('INSERT INTO clients (created, nom, prenom, adresse) VALUES (?, ?, ?, ?)', (1002938, nom, prenom, "ICI"))
+
+@app.route('/init_db')
+def init_db():
+    conn = get_db_connection()
+    
+    # Créer les tables si elles n'existent pas
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS livres (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            titre TEXT NOT NULL,
+            auteur TEXT NOT NULL,
+            isbn TEXT UNIQUE,
+            editeur TEXT,
+            annee INTEGER,
+            categorie TEXT,
+            description TEXT,
+            stock INTEGER DEFAULT 1
+        )
+    ''')
+    
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS lecteurs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nom TEXT NOT NULL,
+            prenom TEXT NOT NULL,
+            email TEXT,
+            telephone TEXT
+        )
+    ''')
+    
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS emprunts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            livre_id INTEGER,
+            lecteur_id INTEGER,
+            date_emprunt DATE NOT NULL,
+            date_retour_prevue DATE NOT NULL,
+            date_retour DATE,
+            FOREIGN KEY (livre_id) REFERENCES livres (id),
+            FOREIGN KEY (lecteur_id) REFERENCES lecteurs (id)
+        )
+    ''')
+    
     conn.commit()
     conn.close()
-    return redirect('/consultation/')  # Rediriger vers la page d'accueil après l'enregistrement
+    
+    flash('Base de données initialisée avec succès!')
+    return redirect(url_for('index'))
                                                                                                                                        
 if __name__ == "__main__":
   app.run(debug=True)
